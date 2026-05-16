@@ -44,9 +44,6 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(p => p.CreatedAt)
             .IsRequired();
 
-        // HasStock é calculado — não persistir
-        builder.Ignore(p => p.HasStock);
-
         // ── Relacionamentos ───────────────────────────────────
 
         builder.HasOne(p => p.Category)
