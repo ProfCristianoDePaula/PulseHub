@@ -16,7 +16,6 @@
   <ItemGroup>
     <ProjectReference Include="..\PulseHub.Domain\PulseHub.Domain.csproj" />
     <ProjectReference Include="..\PulseHub.Application\PulseHub.Application.csproj" />
-    <ProjectReference Include="..\PulseHub.API\PulseHub.API.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

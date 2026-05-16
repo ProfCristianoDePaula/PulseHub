@@ -1,58 +1,64 @@
-﻿
-// PulseHub.Domain/Entities/User.cs
+﻿// PulseHub.Domain/Entities/User.cs
 
 using PulseHub.Domain.Exceptions;
+using System.Net;
 
 namespace PulseHub.Domain.Entities;
 
-///<summary>
-/// Entidade de usuário — coração do domínio.
-/// Não conhece banco de dados, não conhece HTTP.
-/// Apenas regras de negócio.
-///</summary>
 public class User
 {
     public Guid Id { get; private set; }
-    public string Name { get; private set; }
-    public string Email { get; private set; }
+    public string Name { get; private set; } = string.Empty;
+    public string Email { get; private set; } = string.Empty;
     public bool IsActive { get; private set; }
     public DateTime CreatedAt { get; private set; }
+    public DateTime? DeletedAt { get; private set; }
 
-    // Construtor privado — evita criação sem validação
+    // Navegação — EF Core usa isso para os JOINs
+    private readonly List<Order> _orders = new();
+    public IReadOnlyCollection<Order> Orders => _orders.AsReadOnly();
+
+    private readonly List<Address> _addresses = new();
+    public IReadOnlyCollection<Address> Addresses => _addresses.AsReadOnly();
+
+    // EF Core precisa de construtor sem parâmetros (privado está ok)
     private User() { }
 
-    ///<summary>
-    /// Factory method — única forma de criar um usuário válido.
-    /// Garante que NUNCA existe um User inválido no sistema.
-    ///</summary>
     public static User Create(string name, string email)
     {
-        // Validação de domínio — regra de negócio pura
-        if (string.IsNullOrWhiteSpace(name))
-            throw new DomainException("Nome é obrigatório");
+        ArgumentException.ThrowIfNullOrWhiteSpace(name, nameof(name));
+        ArgumentException.ThrowIfNullOrWhiteSpace(email, nameof(email));
 
-        if (string.IsNullOrWhiteSpace(email) || !email.Contains("@"))
-            throw new DomainException("Email inválido");
+        if (!email.Contains('@'))
+            throw new DomainException("Formato de email inválido.");
 
         return new User
         {
             Id = Guid.NewGuid(),
             Name = name.Trim(),
-            Email = email.ToLower().Trim(),
+            Email = email.ToLowerInvariant().Trim(),
             IsActive = true,
             CreatedAt = DateTime.UtcNow
         };
     }
 
-    ///<summary>
-    /// Comportamento de domínio — desativar usuário.
-    /// Repare: a entidade encapsula sua própria lógica.
-    ///</summary>
+    public void UpdateName(string name)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name, nameof(name));
+        Name = name.Trim();
+    }
+
     public void Deactivate()
     {
-        if (!IsActive)
-            throw new DomainException("Usuário já está inativo");
-
+        if (!IsActive) throw new DomainException("Usuário já está inativo.");
         IsActive = false;
+        DeletedAt = DateTime.UtcNow;
+    }
+
+    public void Reactivate()
+    {
+        if (IsActive) throw new DomainException("Usuário já está ativo.");
+        IsActive = true;
+        DeletedAt = null;
     }
 }
