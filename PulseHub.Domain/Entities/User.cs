@@ -1,6 +1,8 @@
 ﻿
 // PulseHub.Domain/Entities/User.cs
 
+using PulseHub.Domain.Exceptions;
+
 namespace PulseHub.Domain.Entities;
 
 ///<summary>

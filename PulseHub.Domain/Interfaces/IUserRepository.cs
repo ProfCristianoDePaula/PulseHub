@@ -16,4 +16,8 @@ public interface IUserRepository
     Task<bool> ExistsByEmailAsync(string email, CancellationToken cancellationToken = default);
     Task AddAsync(User user, CancellationToken cancellationToken = default);
     Task UpdateAsync(User user, CancellationToken cancellationToken = default);
+    Task<(IEnumerable<User> Users, int Total)> GetPagedAsync( string? searchTerm = null,
+      bool? isActive = null,int page = 1, int pageSize = 20, 
+      CancellationToken cancellationToken = default);
+    Task<User?> GetByIdWithOrdersAsync(Guid id,CancellationToken cancellationToken = default);
 }
